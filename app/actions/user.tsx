@@ -4,32 +4,59 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-const error = false;
+/* interface IAccount {
+  name: string;
+  accountNumber: string;
+} */
 
-const fetch = () =>
+interface IAccountResponse {
+  id: string | number;
+  error: {
+    message: string;
+  };
+}
+
+const saveAccount = (/*
+  payloadResponse: IAccount
+ */): Promise<Partial<IAccountResponse>> =>
   new Promise((resolve, reject) => {
-    setTimeout(() => {
-      if (error) {
-        reject("error");
+    const fetcher = async () => {
+      const response = await fetch("http://localhost:4000/accounts/1", {
+        method: "Get",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        //body: JSON.stringify(payloadResponse),
+      });
+      if (response.ok) {
+        return resolve({ id: 1 });
       } else {
-        resolve("success");
+        return reject({ error: { message: "error on POST Method" } });
       }
-    }, 2000);
+    };
+
+    setTimeout(fetcher, 2000);
   });
 
 export async function createAccount() {
-  console.log("que esta pasando aqui!");
+  let response: Partial<IAccountResponse> | null = null;
   try {
     // Call database
-    const response = await fetch();
-    if (!error && response === "success") {
-      console.log("aca estoy dentro del if!");
+    response = await saveAccount(/* {
+      name: "Gabriel",
+      accountNumber: "1",
+    } */);
+    console.log(response);
+    if (!!response.error) {
+      throw new Error(response.error.message);
     }
   } catch (err) {
     // Handle errors
     console.log(err);
   }
 
-  revalidatePath("/home"); // que hace esto??
-  redirect(`/home`); // Navigate to the new account
+  if (!!response?.id) {
+    revalidatePath("/home"); // que hace esto??
+    redirect(`/home?account=${response.id}`); // Navigate to the new account
+  }
 }

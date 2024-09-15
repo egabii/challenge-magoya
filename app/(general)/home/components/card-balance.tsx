@@ -1,5 +1,5 @@
 "use client";
-import * as React from "react";
+import { useState } from "react";
 import {
   EyeClosedIcon,
   EyeOpenIcon,
@@ -10,24 +10,32 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
+//import { useSearchParams } from "next/navigation";
+import { selectBalance, selectAccountDetail } from "@/app/store/accounts-slice";
+import { useAppSelector } from "@/app/store/hooks";
+import { currencyFormat } from "@/lib/utils";
 
-type CardBalanceProps = {
-  accountId: string;
-};
+export default function CardBalance() {
+  //const searchParams = useSearchParams();
+  //const accountId = searchParams.get("accountId");
+  //const dispatch = useAppDispatch();
 
-export default function CardBalance({ accountId }: CardBalanceProps) {
-  const number = 123456.789;
-  const [hideMoney, setHideMoney] = React.useState<boolean>(false);
+  const [hideMoney, setHideMoney] = useState<boolean>(false);
+  const balance = useAppSelector(selectBalance);
+  const accountDetail = useAppSelector(selectAccountDetail);
   const router = useRouter();
+
   return (
-    <Card className="w-[450px]">
+    <Card className="w-6/6">
       <CardHeader>
-        <CardTitle>CA: 123123221/2</CardTitle>
+        <CardTitle>CA: {accountDetail.account_number}</CardTitle>
+        <CardDescription>Owner: {accountDetail.name}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-row gap-4 items-center justify-between">
@@ -46,21 +54,14 @@ export default function CardBalance({ accountId }: CardBalanceProps) {
           </Button>
         </div>
         {!hideMoney ? (
-          <p className="text-2xl">
-            {new Intl.NumberFormat("es-AR", {
-              style: "currency",
-              currency: "ARS",
-            }).format(number)}
-          </p>
+          <p className="text-2xl">{currencyFormat(balance)}</p>
         ) : (
           <p className="text-2xl">Shhh!</p>
         )}
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button
-          variant="outline"
-          onClick={() => router.push(`/home/${accountId}/deposito`)}
-        >
+        {/* <TopUpDialog></TopUpDialog> */}
+        <Button variant="outline" onClick={() => router.push("/home/deposit")}>
           <ArrowUpIcon className="mr-2 h-4 w-4" />
           Depositar
         </Button>
