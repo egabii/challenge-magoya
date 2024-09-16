@@ -19,7 +19,7 @@ import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
 import { selectBalance, selectAccountDetail } from "@/app/store/accounts-slice";
 import { useAppSelector } from "@/app/store/hooks";
-import { useMutateBalance } from "../queries/account-query";
+import { useMutateBalance } from "../../../queries/account-query";
 import { Intl_config, cn } from "@/lib/utils";
 
 export function WithdrawForm() {

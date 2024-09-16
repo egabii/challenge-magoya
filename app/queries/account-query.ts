@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { accountsCollection } from "@/lib/mock-data/accounts";
 import { transactionsCollection } from "@/lib/mock-data/transactions";
-import { IAccount } from "@/lib/definitions";
+import { IAccount, ITransaction, TransactionType } from "@/lib/definitions";
 import { incrementBalance, decrementBalance } from "@/app/store/accounts-slice";
 import {
   setTransactions,
@@ -11,7 +11,7 @@ import { useAppSelector, useAppDispatch } from "@/app/store/hooks";
 
 const error = false;
 interface IMutateBalanceType extends Omit<IAccount, "id" | "name"> {
-  type: "Deposito" | "Retiro";
+  type: TransactionType;
 }
 
 /* const getAccountById = (id: number): Promise<IAccount> =>
@@ -50,20 +50,52 @@ const loginAccount = (accountNumber: number): Promise<IAccount> =>
     }, 2000);
   });
 
-const updateBalance = (deposit: IMutateBalanceType): Promise<IAccount> =>
+const createAccount = (payload: Omit<IAccount, "id">): Promise<IAccount> =>
   new Promise((resolve, reject) => {
     setTimeout(() => {
       if (error) {
         reject({ message: "cannot fetch account detail right now" });
       } else {
         const foundAccount = accountsCollection.find(
-          (account) => account.accountNumber === deposit.accountNumber
+          (account) => account.accountNumber === payload.accountNumber
+        );
+        if (foundAccount) {
+          reject({ message: "account number already exist not find account" });
+        } else {
+          const lastItemId =
+            accountsCollection[accountsCollection.length - 1].id;
+          const newAccount = {
+            ...payload,
+            id: lastItemId + 1,
+          };
+          accountsCollection.push({
+            ...newAccount,
+            id: lastItemId + 1,
+          });
+          resolve(newAccount);
+        }
+      }
+    }, 2000);
+  });
+
+const updateBalance = (payload: IMutateBalanceType): Promise<IAccount> =>
+  new Promise((resolve, reject) => {
+    setTimeout(() => {
+      if (error) {
+        reject({ message: "cannot fetch account detail right now" });
+      } else {
+        const foundAccount = accountsCollection.find(
+          (account) => account.accountNumber === payload.accountNumber
         );
         if (!foundAccount) {
           reject({ message: "could not find accountw" });
         } else {
-          if (deposit.balance) {
-            foundAccount.balance = deposit.balance;
+          if (payload.balance) {
+            if (payload.type === "Deposito") {
+              foundAccount.balance += payload.balance;
+            } else {
+              foundAccount.balance -= payload.balance;
+            }
           }
           resolve(foundAccount);
         }
@@ -85,18 +117,24 @@ export const useMutateBalance = () => {
         }
 
         const lastTransactions = transactions[transactions.length - 1];
-        const nextTransactionId =
-          parseInt(lastTransactions.id.split("_")[1]) + 1;
+        const nextTransactionId = !!lastTransactions
+          ? parseInt(lastTransactions.id.split("_")[1]) + 1
+          : "0";
         dispatch(
-          setTransactions([
-            ...transactions,
-            {
-              id: `tx_${nextTransactionId}`,
-              amount: variables.balance,
-              transactionType: variables.type,
-              createdAt: new Date().toISOString().split(".")[0],
-            },
-          ])
+          setTransactions(
+            [
+              ...transactions,
+              {
+                id: `tx_${nextTransactionId}`,
+                amount: variables.balance,
+                transactionType: variables.type,
+                createdAt: new Date().toISOString().split(".")[0],
+                accountNumber: variables.accountNumber,
+              },
+            ].filter(
+              (t: ITransaction) => t.accountNumber === variables.accountNumber
+            )
+          )
         );
       },
     });
@@ -117,8 +155,33 @@ export const useLoginAccount = () => {
   const { data, error, isError, isPending, isSuccess, mutate, status } =
     useMutation({
       mutationFn: loginAccount,
+      onSuccess: (_, variables) => {
+        dispatch(
+          setTransactions(
+            transactionsCollection.filter((t) => t.accountNumber === variables)
+          )
+        );
+      },
+    });
+
+  return {
+    data,
+    error,
+    isError,
+    isPending,
+    isSuccess,
+    mutate,
+    status,
+  };
+};
+
+export const useCreateAccount = () => {
+  const dispatch = useAppDispatch();
+  const { data, error, isError, isPending, isSuccess, mutate, status } =
+    useMutation({
+      mutationFn: createAccount,
       onSuccess: () => {
-        dispatch(setTransactions(transactionsCollection));
+        dispatch(setTransactions([]));
       },
     });
 

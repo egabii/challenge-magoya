@@ -6,17 +6,18 @@ import {
   SyntheticEvent,
   useEffect,
   useState,
+  startTransition,
 } from "react";
+import { useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { useRouter } from "next/navigation";
 import { setAccount } from "@/app/store/accounts-slice";
 import { useAppDispatch } from "@/app/store/hooks";
-import { useLoginAccount } from "@/app/(general)/home/queries/account-query";
+import { useLoginAccount } from "@/app/queries/account-query";
 
 interface UserAuthFormProps extends HTMLAttributes<HTMLDivElement> {}
 
@@ -34,14 +35,16 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, isSuccess]);
 
-  useEffect(() => {
-    console.log(error);
-  }, [error]);
-
-  async function onSubmit(event: SyntheticEvent) {
+  const onSubmit = async (event: SyntheticEvent) => {
     event.preventDefault();
     mutate(accountNumber);
-  }
+  };
+
+  const goToSignUp = () => {
+    startTransition(() => {
+      router.push("/sign-up");
+    });
+  };
 
   return (
     <div className={cn("grid gap-6 w-[350px]", className)} {...props}>
@@ -52,7 +55,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
               Numero de Cuenta
             </Label>
             <Input
-              className="p-4 text-lg"
+              className="p-6 text-lg"
               id="account-number"
               placeholder="numero de cuenta"
               type="text"
@@ -84,15 +87,15 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
           </span>
         </div>
       </div>
-      {/* <Button
+      <Button
         className="text-xl p-6"
         variant="outline"
         type="button"
         disabled={isPending}
+        onClick={goToSignUp}
       >
-        {isPending ? <Spinner className="mr-2 h-4 w-4 animate-spin" /> : null}{" "}
         Crear cuenta
-      </Button> */}
+      </Button>
     </div>
   );
 }

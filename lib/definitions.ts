@@ -11,4 +11,5 @@ export interface ITransaction {
   amount: number;
   transactionType: TransactionType;
   createdAt: string;
+  accountNumber: number;
 }

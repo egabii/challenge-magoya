@@ -1,4 +1,4 @@
-import { IAccount } from "./definitions";
+import { IAccount } from "../definitions";
 
 export const accountsCollection: IAccount[] = [
   { id: 1, name: "Alice Johnson", accountNumber: 10001, balance: 1234.56 },
