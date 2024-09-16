@@ -1,22 +1,12 @@
 import { createAppSlice } from "@/app/store/createAppSlice";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import { IAccount } from "@/lib/definitions";
 
-export interface AccountSliceState {
-  id: number;
-  name: string;
-  balance: number;
-  account_number: string;
-  alias: string;
-  cvu: string;
-}
-
-const initialState: AccountSliceState = {
+export const initialState: IAccount = {
   id: 0,
-  name: "Gabriel Muller",
-  balance: 123450.88,
-  account_number: "10102",
-  alias: "",
-  cvu: "",
+  name: "",
+  balance: 0,
+  accountNumber: 0,
 };
 
 export const accountSlice = createAppSlice({
@@ -29,24 +19,23 @@ export const accountSlice = createAppSlice({
     decrementBalance: create.reducer((state, action: PayloadAction<number>) => {
       state.balance -= action.payload;
     }),
-    fetchAccount: create.reducer(
-      (state, action: PayloadAction<AccountSliceState>) => {
-        state = {
-          ...state,
-          ...action.payload,
-        };
-      }
-    ),
+    setAccount: create.reducer((state, action: PayloadAction<IAccount>) => {
+      state.accountNumber = action.payload.accountNumber;
+      state.name = action.payload.name;
+      state.balance = action.payload.balance;
+      state.id = action.payload.id;
+    }),
   }),
   selectors: {
     selectBalance: (account) => account.balance,
-    selectAccountDetail: ({ name, account_number }) => ({
+    selectAccountDetail: ({ name, accountNumber }) => ({
       name,
-      account_number,
+      accountNumber,
     }),
   },
 });
 
-export const { incrementBalance, decrementBalance } = accountSlice.actions;
+export const { incrementBalance, decrementBalance, setAccount } =
+  accountSlice.actions;
 
 export const { selectBalance, selectAccountDetail } = accountSlice.selectors;

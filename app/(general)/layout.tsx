@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import ButtonCloseSession from "@/components/button-close-session";
 import { LinkedInLogoIcon, GitHubLogoIcon } from "@radix-ui/react-icons";
 
@@ -16,7 +17,9 @@ export default function HomeLayout({
   return (
     <div className="w-full grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 px-0 gap-16 font-[family-name:var(--font-geist-sans)]">
       <nav className="w-full flex gap-6 flex-wrap items-center justify-between bg-green-500 p-10">
-        <h1>Next Bank</h1>
+        <Link href="/home" className="text-2xl">
+          Next Bank
+        </Link>
         {isSessionActive && <ButtonCloseSession />}
       </nav>
       <main className="w-full flex flex-col gap-8 row-start-2 md:items-center sm:items-start">

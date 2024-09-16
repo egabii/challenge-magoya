@@ -1,19 +1,14 @@
-import { z } from "zod";
+export interface IAccount {
+  id: number;
+  name: string;
+  accountNumber: number;
+  balance: number;
+}
 
-export const CreateAccountSchema = z.object({
-  name: z
-    .string()
-    .min(2, { message: "Name must be at least 2 characters long." })
-    .trim(),
-  account_type: z.string().trim(), //([z.string(), z.number()]), //.min(2,{ message: 'Please enter a valid email.' }).trim()
-});
-
-export type NewAccountFormState =
-  | {
-      errors?: {
-        name?: string[];
-        account_type?: string[];
-      };
-      message?: string;
-    }
-  | undefined;
+export type TransactionType = "Retiro" | "Deposito";
+export interface ITransaction {
+  id: string;
+  amount: number;
+  transactionType: TransactionType;
+  createdAt: string;
+}

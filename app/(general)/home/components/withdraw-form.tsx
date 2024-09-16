@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState, startTransition } from "react";
+import { useState, useEffect, startTransition } from "react";
 import { useRouter } from "next/navigation";
+
 import CurrencyInput, {
   CurrencyInputOnChangeValues,
 } from "react-currency-input-field";
@@ -21,13 +22,14 @@ import { useAppSelector } from "@/app/store/hooks";
 import { useMutateBalance } from "../queries/account-query";
 import { Intl_config, cn } from "@/lib/utils";
 
-export function DepositForm() {
+export function WithdrawForm() {
   const balance = useAppSelector(selectBalance);
   const accountDetail = useAppSelector(selectAccountDetail);
-  const [amount, setAmount] = useState<string | undefined>("0");
+  const [amount, setAmount] = useState<string>("0");
   const [parsedAmount, setParsedAmount] = useState<number>(0);
-  const router = useRouter();
+  const [error, setError] = useState(false);
   const mutation = useMutateBalance();
+  const router = useRouter();
 
   useEffect(() => {
     if (mutation.isSuccess) {
@@ -49,13 +51,20 @@ export function DepositForm() {
     _name: string = "",
     values: CurrencyInputOnChangeValues | undefined
   ) => {
+    const floatValue = values?.float ?? 0;
     setAmount(value ?? "0");
-    setParsedAmount(values?.float ?? 0);
+    if (error && floatValue < balance) {
+      setError(false);
+    } else if (floatValue > balance) {
+      setError(true);
+    } else {
+      setParsedAmount(values?.float ?? 0);
+    }
   };
 
   const onSubmit = () => {
     mutation.mutate({
-      type: "Deposito",
+      type: "Retiro",
       accountNumber: accountDetail.accountNumber,
       balance: parsedAmount,
     });
@@ -64,9 +73,8 @@ export function DepositForm() {
   return (
     <Card className="w-4/6">
       <CardHeader>
-        <CardTitle className="text-2xl"> Realice su deposito </CardTitle>
+        <CardTitle className="text-2xl"> Realice su Retiro </CardTitle>
         <CardDescription className="flex flex-col">
-          <span className="text-lg">Elegí cómo ingresar dinero</span>
           <span className="text-lg">Tu Balance: {balance}</span>
           <span className="text-lg">
             Recuerde que toda transaccion es irreversible, si no esta seguro, no
@@ -96,6 +104,11 @@ export function DepositForm() {
                 decimalsLimit={2}
                 onValueChange={onChangeAmountInput}
               />
+              {error && (
+                <p className="text-red-600 text-lg">
+                  El monto a retirar es mayor al balance en cuenta
+                </p>
+              )}
             </div>
           </div>
         </form>
@@ -104,12 +117,12 @@ export function DepositForm() {
         <Button
           className="p-8 text-lg"
           onClick={onSubmit}
-          disabled={parsedAmount === 0}
+          disabled={error || parsedAmount === 0}
         >
           {mutation.isPending && (
             <Spinner className="mr-2 h-4 w-4 animate-spin" />
           )}
-          Depositar
+          Retirar
         </Button>
       </CardFooter>
     </Card>

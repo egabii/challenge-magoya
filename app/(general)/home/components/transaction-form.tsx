@@ -1,6 +1,7 @@
 "use client";
-import { useEffect, useState, startTransition } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+
 import CurrencyInput, {
   CurrencyInputOnChangeValues,
 } from "react-currency-input-field";
@@ -14,34 +15,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { selectBalance, selectAccountDetail } from "@/app/store/accounts-slice";
-import { useAppSelector } from "@/app/store/hooks";
-import { useMutateBalance } from "../queries/account-query";
+import { selectBalance, incrementBalance } from "@/app/store/accounts-slice";
+import { useAppSelector, useAppDispatch } from "@/app/store/hooks";
 import { Intl_config, cn } from "@/lib/utils";
 
 export function DepositForm() {
   const balance = useAppSelector(selectBalance);
-  const accountDetail = useAppSelector(selectAccountDetail);
-  const [amount, setAmount] = useState<string | undefined>("0");
+  const [amount, setAmount] = useState<string>("0");
   const [parsedAmount, setParsedAmount] = useState<number>(0);
+  const [isLoading, setIsLading] = useState(false);
+  const [error, setError] = useState(false);
   const router = useRouter();
-  const mutation = useMutateBalance();
-
-  useEffect(() => {
-    if (mutation.isSuccess) {
-      startTransition(() => {
-        router.push("/home");
-      });
-    }
-  }, [mutation.isSuccess]);
-
-  if (accountDetail.accountNumber === 0) {
-    startTransition(() => {
-      router.push("/");
-    });
-  }
+  const dispatch = useAppDispatch();
 
   const onChangeAmountInput = (
     value: string | undefined,
@@ -49,18 +43,25 @@ export function DepositForm() {
     _name: string = "",
     values: CurrencyInputOnChangeValues | undefined
   ) => {
+    const floatValue = values?.float ?? 0;
     setAmount(value ?? "0");
-    setParsedAmount(values?.float ?? 0);
+    if (error && floatValue < balance) {
+      setError(false);
+    } else if (floatValue > balance) {
+      setError(true);
+    } else {
+      setParsedAmount(values?.float ?? 0);
+    }
   };
 
   const onSubmit = () => {
-    mutation.mutate({
-      type: "Deposito",
-      accountNumber: accountDetail.accountNumber,
-      balance: parsedAmount,
-    });
+    setIsLading(true);
+    setTimeout(() => {
+      setIsLading(false);
+      dispatch(incrementBalance(parsedAmount));
+      router.push("/home");
+    }, 2000);
   };
-
   return (
     <Card className="w-4/6">
       <CardHeader>
@@ -69,7 +70,7 @@ export function DepositForm() {
           <span className="text-lg">Elegí cómo ingresar dinero</span>
           <span className="text-lg">Tu Balance: {balance}</span>
           <span className="text-lg">
-            Recuerde que toda transaccion es irreversible, si no esta seguro, no
+            Recuerdo que toda transaccion es irreversible, si no esta seguro, no
             continue con la operacion
           </span>
         </CardDescription>
@@ -97,18 +98,24 @@ export function DepositForm() {
                 onValueChange={onChangeAmountInput}
               />
             </div>
+            <div className="flex flex-col space-y-1.5">
+              <Label htmlFor="transaction">Framework</Label>
+              <Select>
+                <SelectTrigger id="transaction">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  <SelectItem value="depositar">Depositar</SelectItem>
+                  <SelectItem value="retirar">Retirar</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </form>
       </CardContent>
       <CardFooter className="flex justify-end">
-        <Button
-          className="p-8 text-lg"
-          onClick={onSubmit}
-          disabled={parsedAmount === 0}
-        >
-          {mutation.isPending && (
-            <Spinner className="mr-2 h-4 w-4 animate-spin" />
-          )}
+        <Button className="p-8 text-lg" onClick={onSubmit}>
+          {isLoading && <Spinner className="mr-2 h-4 w-4 animate-spin" />}
           Depositar
         </Button>
       </CardFooter>

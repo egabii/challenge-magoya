@@ -1,8 +1,9 @@
 import type { Action, ThunkAction } from "@reduxjs/toolkit";
 import { combineSlices, configureStore } from "@reduxjs/toolkit";
 import { accountSlice } from "@/app/store/accounts-slice";
+import { transactionsSlice } from "@/app/store/transactions-slice";
 
-const rootReducer = combineSlices(accountSlice);
+const rootReducer = combineSlices(accountSlice, transactionsSlice);
 export type RootState = ReturnType<typeof rootReducer>;
 
 export const makeStore = () => {
@@ -25,3 +26,10 @@ export type AppThunk<ThunkReturnType = void> = ThunkAction<
   unknown,
   Action
 >;
+
+export const setupStoreForTest = (preloadedState?: Partial<RootState>) => {
+  return configureStore({
+    reducer: rootReducer,
+    preloadedState,
+  });
+};

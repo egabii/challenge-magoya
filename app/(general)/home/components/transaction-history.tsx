@@ -1,64 +1,40 @@
 "use client";
-import * as React from "react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { currencyFormat } from "@/lib/utils";
+import { selectTransactionsByAscOrder } from "@/app/store/transactions-slice";
+import { useAppSelector } from "@/app/store/hooks";
+import { Intl_config } from "@/lib/utils";
+
+const formatDate = (aDate: string) => {
+  const date = new Date(aDate);
+  return new Intl.DateTimeFormat(Intl_config.locale).format(date);
+};
+
+const addColorByTransactionType = (type: string) => {
+  return type === "Deposito" ? "text-green-500" : "text-red-500";
+};
+
 export default function TransactionsHistory() {
-  //Fecha, monto, tipo de transacción.
-  const transactions = [
-    {
-      id: "INV001",
-      amount: 1232.22,
-      transactionType: "Deposito",
-      createdAt: new Date().toString(),
-    },
-    {
-      id: "INV002",
-      amount: 700.0,
-      transactionType: "Deposito",
-      createdAt: new Date().toString(),
-    },
-    {
-      id: "INV003",
-      amount: 910.0,
-      transactionType: "Retiro",
-      createdAt: new Date().toString(),
-    },
-    {
-      id: "INV004",
-      amount: 910.0,
-      transactionType: "Deposito",
-      createdAt: new Date().toString(),
-    },
-    {
-      id: "INV005",
-      amount: 910.0,
-      transactionType: "Retiro",
-      createdAt: new Date().toString(),
-    },
-    {
-      id: "INV006",
-      amount: 910.0,
-      transactionType: "Deposito",
-      createdAt: new Date().toString(),
-    },
-    {
-      id: "INV007",
-      amount: 910.0,
-      transactionType: "Retiro",
-      createdAt: new Date().toString(),
-    },
-  ];
+  const transactions = useAppSelector(selectTransactionsByAscOrder);
   return (
     <Table>
-      <TableCaption>A list of your recent ids.</TableCaption>
       <TableHeader>
         <TableRow>
           <TableHead>Transaccion</TableHead>
@@ -70,16 +46,44 @@ export default function TransactionsHistory() {
         {transactions.map((transaction) => (
           <TableRow key={transaction.id}>
             <TableCell>{transaction.transactionType}</TableCell>
-            <TableCell>{transaction.createdAt}</TableCell>
-            <TableCell className="text-right">{transaction.amount}</TableCell>
+            <TableCell>{formatDate(transaction.createdAt)}</TableCell>
+            <TableCell
+              className={`text-right ${addColorByTransactionType(
+                transaction.transactionType
+              )}`.trim()}
+            >
+              {currencyFormat(transaction.amount)}
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
       <TableFooter>
-        <TableRow>
-          <TableCell colSpan={3}>Total</TableCell>
-          <TableCell className="text-right">$2,500.00</TableCell>
-        </TableRow>
+        {false && (
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious href="#" />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink href="#">1</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink href="#" isActive>
+                  2
+                </PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink href="#">3</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext href="#" />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        )}
       </TableFooter>
     </Table>
   );

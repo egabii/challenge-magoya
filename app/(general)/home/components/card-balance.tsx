@@ -16,16 +16,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-//import { useSearchParams } from "next/navigation";
 import { selectBalance, selectAccountDetail } from "@/app/store/accounts-slice";
 import { useAppSelector } from "@/app/store/hooks";
 import { currencyFormat } from "@/lib/utils";
 
 export default function CardBalance() {
-  //const searchParams = useSearchParams();
-  //const accountId = searchParams.get("accountId");
-  //const dispatch = useAppDispatch();
-
   const [hideMoney, setHideMoney] = useState<boolean>(false);
   const balance = useAppSelector(selectBalance);
   const accountDetail = useAppSelector(selectAccountDetail);
@@ -34,12 +29,16 @@ export default function CardBalance() {
   return (
     <Card className="w-6/6">
       <CardHeader>
-        <CardTitle>CA: {accountDetail.account_number}</CardTitle>
-        <CardDescription>Owner: {accountDetail.name}</CardDescription>
+        <CardTitle className="text-2xl">
+          Numero de cuenta: {accountDetail.accountNumber}
+        </CardTitle>
+        <CardDescription className="text-lg">
+          Titular: {accountDetail.name}
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-row gap-4 items-center justify-between">
-          <p>Dinero disponible</p>
+        <div className="flex flex-row gap-4 items-center justify-start">
+          <p className="text-2lx">Dinero disponible</p>
           <Button
             variant="ghost"
             className=""
@@ -60,12 +59,19 @@ export default function CardBalance() {
         )}
       </CardContent>
       <CardFooter className="flex justify-between">
-        {/* <TopUpDialog></TopUpDialog> */}
-        <Button variant="outline" onClick={() => router.push("/home/deposit")}>
+        <Button
+          className="p-6"
+          variant="outline"
+          onClick={() => router.push("/home/deposit")}
+        >
           <ArrowUpIcon className="mr-2 h-4 w-4" />
           Depositar
         </Button>
-        <Button variant="outline">
+        <Button
+          className="p-6"
+          variant="outline"
+          onClick={() => router.push("/home/withdraw")}
+        >
           <ArrowDownIcon className="mr-2 h-4 w-4" />
           Retirar
         </Button>
