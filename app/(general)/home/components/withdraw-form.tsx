@@ -39,6 +39,10 @@ export function WithdrawForm() {
     }
   }, [mutation.isSuccess]);
 
+  useEffect(() => {
+    console.error(mutation.error);
+  }, [mutation.error]);
+
   if (accountDetail.accountNumber === 0) {
     startTransition(() => {
       router.push("/");

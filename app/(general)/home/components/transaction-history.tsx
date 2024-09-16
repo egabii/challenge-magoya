@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { currencyFormat } from "@/lib/utils";
 import { selectTransactionsByAscOrder } from "@/app/store/transactions-slice";
+import { selectAccountDetail } from "@/app/store/accounts-slice";
 import { useAppSelector } from "@/app/store/hooks";
 import { Intl_config } from "@/lib/utils";
 
@@ -32,7 +33,10 @@ const addColorByTransactionType = (type: string) => {
 };
 
 export default function TransactionsHistory() {
-  const transactions = useAppSelector(selectTransactionsByAscOrder);
+  const accountDetail = useAppSelector(selectAccountDetail);
+  const transactions = useAppSelector(selectTransactionsByAscOrder).filter(
+    (t) => t.accountNumber === accountDetail.accountNumber
+  );
   return (
     <Table>
       <TableHeader>

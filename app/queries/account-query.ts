@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { accountsCollection } from "@/lib/mock-data/accounts";
 import { transactionsCollection } from "@/lib/mock-data/transactions";
-import { IAccount, ITransaction, TransactionType } from "@/lib/definitions";
+import { IAccount, TransactionType } from "@/lib/definitions";
 import { incrementBalance, decrementBalance } from "@/app/store/accounts-slice";
 import {
   setTransactions,
@@ -116,26 +116,20 @@ export const useMutateBalance = () => {
           dispatch(decrementBalance(variables.balance));
         }
 
-        const lastTransactions = transactions[transactions.length - 1];
+        const lastTransactions =
+          transactionsCollection[transactionsCollection.length - 1];
         const nextTransactionId = !!lastTransactions
           ? parseInt(lastTransactions.id.split("_")[1]) + 1
           : "0";
-        dispatch(
-          setTransactions(
-            [
-              ...transactions,
-              {
-                id: `tx_${nextTransactionId}`,
-                amount: variables.balance,
-                transactionType: variables.type,
-                createdAt: new Date().toISOString().split(".")[0],
-                accountNumber: variables.accountNumber,
-              },
-            ].filter(
-              (t: ITransaction) => t.accountNumber === variables.accountNumber
-            )
-          )
-        );
+        transactionsCollection.push({
+          id: `tx_${nextTransactionId}`,
+          amount: variables.balance,
+          transactionType: variables.type,
+          createdAt: new Date().toISOString().split(".")[0],
+          accountNumber: variables.accountNumber,
+        });
+
+        dispatch(setTransactions(transactionsCollection));
       },
     });
 
@@ -155,12 +149,8 @@ export const useLoginAccount = () => {
   const { data, error, isError, isPending, isSuccess, mutate, status } =
     useMutation({
       mutationFn: loginAccount,
-      onSuccess: (_, variables) => {
-        dispatch(
-          setTransactions(
-            transactionsCollection.filter((t) => t.accountNumber === variables)
-          )
-        );
+      onSuccess: () => {
+        dispatch(setTransactions(transactionsCollection));
       },
     });
 

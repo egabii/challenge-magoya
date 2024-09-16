@@ -16,7 +16,7 @@ export const transactionsSlice = createAppSlice({
   reducers: (create) => ({
     setTransactions: create.reducer(
       (state, action: PayloadAction<ITransaction[]>) => {
-        state.transactions = action.payload;
+        state.transactions = [...action.payload];
       }
     ),
   }),
