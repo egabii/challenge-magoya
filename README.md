@@ -50,7 +50,29 @@ pnpm dev
 bun dev
 ```
 
+### Como funciona?
+
 Abra [http://localhost:3000](http://localhost:3000) en su navegador favorito.
+
+Una vez que entraron a la aplicacion, pueden iniciar sesion con alguno de las cuentas que pueden
+encontrar en `/lib/mock-data/accounts.ts`
+
+```json
+export const accountsCollection: IAccount[] = [
+  { id: 1, name: "Alice Johnson", accountNumber: 10001, balance: 1234.56 },
+  { id: 2, name: "Bob Smith", accountNumber: 10002, balance: 789.12 },
+  { id: 3, name: "Charlie Brown", accountNumber: 10003, balance: 456.78 },
+  { id: 4, name: "Diana Prince", accountNumber: 10004, balance: 2345.67 },
+  ....
+]
+```
+
+O puede crear una cuenta dirigiendose a `http://localhost:3000/sign-up`. Ingrese nombre, numero de cuenta (este debe ser uno que no exista en la lista), y un saldo inicial.
+
+Una vez creada, la aplicacion se redirecciona a `http://localhost:3000/home`
+
+Para este challenge los datos son falsos y manejados dentro de NextJs, aunque tanto los datos mocks
+como los que se van agregando persisten durante la ejecucion de la aplicacion.
 
 ### Stack Tecnologico:
 
@@ -90,4 +112,5 @@ Para este proyecto se usaron
 /components
    /ui --> aqui se instalan todos los componentes de shadcn ui y cualquier otro componentes que se quiera reutilizar en cualquier otra aplicacion
    Fuera de la carpeta /ui tambien existen algunos componentes propios de la aplicacion pero solo para esta aplicacion
+/lib --> aqui se guardan las funciones utilitarias y los datos mock para hacer uso de la aplicacion
 ```
