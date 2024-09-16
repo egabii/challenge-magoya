@@ -55,7 +55,7 @@ bun dev
 Abra [http://localhost:3000](http://localhost:3000) en su navegador favorito.
 
 Una vez que entraron a la aplicacion, pueden iniciar sesion con alguno de las cuentas que pueden
-encontrar en `/lib/mock-data/accounts.ts`
+encontrar en `/lib/mock-data/accounts.ts` y podes usar el valor que esta en `accountNumber`
 
 ```json
 export const accountsCollection: IAccount[] = [
